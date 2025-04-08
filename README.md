@@ -3,7 +3,7 @@
 This project is the backend of the Chatop application,
 a peer-to-peer rental platform.
 It is developed in Java Spring Boot and uses JWT for authentication,
- Cloudinary for image storage, and MySQL as the database.
+ and MySQL as the database.
 
 ## Prerequisites
 
