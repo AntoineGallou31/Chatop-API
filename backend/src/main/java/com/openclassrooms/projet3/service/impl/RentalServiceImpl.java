@@ -6,6 +6,8 @@ import com.openclassrooms.projet3.dto.response.RentalResponse;
 import com.openclassrooms.projet3.dto.response.RentalsResponse;
 import com.openclassrooms.projet3.entity.Rental;
 import com.openclassrooms.projet3.entity.User;
+import com.openclassrooms.projet3.exception.ResourceNotFoundException;
+import com.openclassrooms.projet3.exception.UnauthorizedException;
 import com.openclassrooms.projet3.repository.RentalRepository;
 import com.openclassrooms.projet3.repository.UserRepository;
 import com.openclassrooms.projet3.service.ImageStorageService;
@@ -54,19 +56,30 @@ public class RentalServiceImpl implements RentalService {
             Rental rental = rentalOptional.get();
             return rentalToRentalResponse(rental);
         } else {
-            // Return null if the rental is not found.
-            return null;
+            throw new ResourceNotFoundException("Rental not found with ID : " + id);
         }
     }
 
     // Creates a new rental with the provided details and associates it with the authenticated user.
     public MessageResponse createRental(String name, BigDecimal surface, BigDecimal price, String description, MultipartFile pictureInput) throws IOException {
 
+        String imageUrl = null;
+
         // Save the image and get its URL.
-        String imageUrl = imageStorageService.saveImage(pictureInput);
+        if (pictureInput != null && !pictureInput.isEmpty()) {
+            try {
+                imageUrl = imageStorageService.saveImage(pictureInput);
+            } catch (IOException e) {
+                throw new RuntimeException("Error while picture upload", e);
+            }
+        }
 
         // Get the authenticated user's email.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedException("user not authenticated");
+        }
+
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);
 

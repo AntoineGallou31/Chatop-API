@@ -1,6 +1,7 @@
 package com.openclassrooms.projet3.service.impl;
 
 import com.openclassrooms.projet3.service.ImageStorageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,12 +17,17 @@ public class ImageStorageServiceImpl implements ImageStorageService {
     // Directory where images will be uploaded
     private final String uploadDir = "uploads/";
 
+    // Inject the base URL for images from application.properties
+    @Value("${env-dev}")
+    private String baseUrl;
+
     /**
      * Saves the provided image file and returns the URL to access the image.
      *
      * @param file the image file to save
      * @return the URL of the uploaded image
      */
+    @Override
     public String saveImage(MultipartFile file) throws IOException {
         // Generate a unique file name by combining a random UUID with the original filename
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
@@ -36,6 +42,6 @@ public class ImageStorageServiceImpl implements ImageStorageService {
         Files.write(filePath, file.getBytes());
 
         // Returns the URL to access the uploaded image
-        return "http://localhost:3001/api/images/" + fileName;
+        return baseUrl + "api/images/" + fileName;
     }
 }
